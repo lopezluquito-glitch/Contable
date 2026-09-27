@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estudio Álbum</title>
+  <meta name="description" content="Mejora tus fotos automáticamente como un diseñador profesional y crea un álbum listo para imprimir.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">◐</span> Estudio Álbum</div>
+    <nav class="steps" id="steps">
+      <button data-view="photos" class="active"><b>1</b> Fotos</button>
+      <button data-view="edit"><b>2</b> Edición</button>
+      <button data-view="album"><b>3</b> Álbum</button>
+    </nav>
+    <button id="exportBtn" class="btn primary">Exportar para imprimir</button>
+  </header>
+
+  <main>
+    <!-- 1 · FOTOS -->
+    <section id="view-photos" class="view active">
+      <div id="dropzone" class="dropzone">
+        <div class="dz-inner">
+          <div class="dz-icon">＋</div>
+          <h1>Arrastra aquí tus fotos</h1>
+          <p>Se revelan automáticamente: exposición, contraste, balance de blancos, color y nitidez.<br>
+            Todo ocurre en tu navegador; tus fotos no se suben a ningún servidor.</p>
+          <label class="btn primary">Elegir fotos
+            <input id="fileInput" type="file" accept="image/*" multiple hidden>
+          </label>
+        </div>
+      </div>
+
+      <div id="library" class="library hidden">
+        <div class="toolbar">
+          <span id="photoCount" class="muted"></span>
+          <label class="field-inline">Estilo para todas
+            <select id="globalStyle"></select>
+          </label>
+          <button id="applyStyleAll" class="btn">Aplicar</button>
+          <label class="field-inline">Ordenar
+            <select id="sortSelect">
+              <option value="date">Por fecha</option>
+              <option value="name">Por nombre</option>
+              <option value="score">Mejores primero</option>
+            </select>
+          </label>
+          <label class="switch"><input type="checkbox" id="showOriginal"> Ver originales</label>
+          <span class="spacer"></span>
+          <label class="btn">Añadir fotos
+            <input id="fileInput2" type="file" accept="image/*" multiple hidden>
+          </label>
+          <button id="toAlbum" class="btn primary">Crear álbum →</button>
+        </div>
+        <div id="photoGrid" class="grid"></div>
+      </div>
+    </section>
+
+    <!-- 2 · EDICIÓN -->
+    <section id="view-edit" class="view">
+      <div class="editor">
+        <div class="stage">
+          <div class="stage-bar">
+            <button id="prevPhoto" class="btn icon" title="Anterior (←)">‹</button>
+            <span id="editName" class="edit-name"></span>
+            <button id="nextPhoto" class="btn icon" title="Siguiente (→)">›</button>
+            <span class="spacer"></span>
+            <label class="switch"><input type="checkbox" id="compareToggle" checked> Antes / después</label>
+            <button id="focusToggle" class="btn" title="Haz clic en la foto para marcar lo más importante; el álbum encuadrará alrededor de ese punto">◎ Punto de interés</button>
+          </div>
+          <div class="canvas-wrap" id="canvasWrap">
+            <div class="compare" id="compare">
+              <canvas id="afterCanvas"></canvas>
+              <canvas id="beforeCanvas"></canvas>
+              <div class="divider" id="divider"><span>◂ ▸</span></div>
+              <div class="tag tag-before">Original</div>
+              <div class="tag tag-after">Mejorada</div>
+              <div class="focus-marker" id="focusMarker"></div>
+            </div>
+            <div id="editEmpty" class="empty">Añade fotos en el paso 1 para editarlas.</div>
+          </div>
+          <div class="filmstrip" id="filmstrip"></div>
+        </div>
+        <aside class="panel">
+          <h3>Estilo</h3>
+          <div class="chips" id="styleChips"></div>
+          <div id="sliders"></div>
+          <div class="panel-actions">
+            <button id="resetAdj" class="btn">Restablecer</button>
+            <button id="copyAdj" class="btn">Aplicar a todas</button>
+            <button id="downloadPhoto" class="btn primary wide">Descargar en alta resolución</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 3 · ÁLBUM -->
+    <section id="view-album" class="view">
+      <div class="album-layout">
+        <aside class="panel">
+          <h3>Portada</h3>
+          <label class="field">Título <input id="setTitle" type="text"></label>
+          <label class="field">Subtítulo / fecha <input id="setSubtitle" type="text" placeholder="Verano 2026"></label>
+          <label class="field">Diseño de portada
+            <select id="setCoverStyle">
+              <option value="overlay">Foto a sangre con título</option>
+              <option value="classic">Clásica (foto + título debajo)</option>
+            </select>
+          </label>
+          <h3>Formato</h3>
+          <label class="field">Tamaño <select id="setSize"></select></label>
+          <label class="field">Fondo</label>
+          <div class="swatches" id="themeSwatches"></div>
+          <label class="field">Márgenes <span id="marginVal" class="muted"></span>
+            <input id="setMargin" type="range" min="0" max="30" step="1">
+          </label>
+          <label class="field">Separación entre fotos <span id="gutterVal" class="muted"></span>
+            <input id="setGutter" type="range" min="0" max="12" step="0.5">
+          </label>
+          <div class="panel-actions">
+            <button id="autoLayout" class="btn primary wide">✦ Diseñar automáticamente</button>
+            <button id="addPage" class="btn wide">+ Añadir página</button>
+          </div>
+          <p class="hint">Arrastra fotos desde la bandeja inferior a cualquier hueco, o entre huecos para intercambiarlas. Doble clic en una foto para editarla.</p>
+        </aside>
+        <div class="album-main">
+          <div id="pages" class="pages"></div>
+          <div class="tray-wrap">
+            <div class="tray-title">Bandeja de fotos <span id="unusedInfo" class="muted"></span></div>
+            <div class="tray" id="tray"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="exportDialog">
+    <form method="dialog" class="dialog">
+      <h2>Exportar para imprimir</h2>
+      <label class="field">Formato
+        <select id="expFormat">
+          <option value="pdf">PDF para imprenta (recomendado)</option>
+          <option value="jpg">Una imagen JPG por página</option>
+        </select>
+      </label>
+      <label class="field">Resolución
+        <select id="expDpi">
+          <option value="300">300 ppp · calidad fotográfica</option>
+          <option value="200">200 ppp · archivo más ligero</option>
+        </select>
+      </label>
+      <label class="switch"><input type="checkbox" id="expBleed" checked> Incluir sangrado de 3 mm (lo piden la mayoría de imprentas)</label>
+      <p id="expInfo" class="muted"></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="btn">Cancelar</button>
+        <button id="expGo" value="ok" class="btn primary">Exportar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="busy" class="busy hidden">
+    <div class="busy-box">
+      <div id="busyMsg">Procesando…</div>
+      <div class="progress"><div id="busyBar"></div></div>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+
+  <script src="js/enhance.js"></script>
+  <script src="js/album.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
