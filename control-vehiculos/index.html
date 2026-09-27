@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Control de Vehículos PNP</title>
+  <meta name="description" content="Control de la flota vehicular policial: vehículos, conductores, salidas y retornos, combustible, mantenimiento y alertas de vencimiento.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z" fill="currentColor"/></svg>
+      </span>
+      <div>
+        <strong>Control de Vehículos</strong>
+        <small>Policía Nacional del Perú</small>
+      </div>
+    </div>
+    <label class="operador">Operador
+      <input id="operador" placeholder="Grado y apellidos" autocomplete="off">
+    </label>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-view="panel" class="active">Panel</button>
+    <button data-view="vehiculos">Vehículos</button>
+    <button data-view="conductores">Conductores</button>
+    <button data-view="salidas">Salidas y retornos</button>
+    <button data-view="combustible">Combustible</button>
+    <button data-view="mantenimiento">Mantenimiento</button>
+    <button data-view="reportes">Reportes</button>
+  </nav>
+
+  <main>
+    <div id="storageWarn" class="banner hidden">
+      Este navegador no permite guardar datos: lo que registres se perderá al cerrar la página.
+      Usa «Reportes → Copia de seguridad» para descargar tus datos.
+    </div>
+
+    <!-- PANEL -->
+    <section id="view-panel" class="view active">
+      <div id="empty" class="empty hidden">
+        <h1>Empieza registrando la flota</h1>
+        <p>Registra los vehículos y los efectivos que los conducen. Después podrás controlar cada salida y
+          retorno, los abastecimientos, el mantenimiento y los vencimientos de SOAT, revisión técnica y licencias.</p>
+        <div class="row">
+          <button class="btn primary" data-action="nuevo-vehiculo">Registrar vehículo</button>
+          <button class="btn" id="demoBtn">Cargar datos de ejemplo</button>
+        </div>
+      </div>
+      <div id="kpis" class="kpis"></div>
+      <div class="cols">
+        <div class="card">
+          <div class="card-head"><h2>En servicio ahora</h2>
+            <button class="btn primary" data-action="nueva-salida">Registrar salida</button></div>
+          <div id="enServicio"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Alertas</h2><span id="alertCount" class="muted"></span></div>
+          <ul id="alertas" class="alerts"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- VEHÍCULOS -->
+    <section id="view-vehiculos" class="view">
+      <div class="toolbar">
+        <input type="search" id="qVeh" placeholder="Buscar placa, marca, unidad…">
+        <select id="fEstado"><option value="">Todos los estados</option></select>
+        <span class="spacer"></span>
+        <button class="btn" data-export="vehiculos">Exportar CSV</button>
+        <button class="btn primary" data-action="nuevo-vehiculo">Nuevo vehículo</button>
+      </div>
+      <div class="table-wrap"><table id="tVeh"></table></div>
+    </section>
+
+    <!-- CONDUCTORES -->
+    <section id="view-conductores" class="view">
+      <div class="toolbar">
+        <input type="search" id="qCond" placeholder="Buscar CIP, apellidos, unidad…">
+        <label class="switch"><input type="checkbox" id="fInactivos"> Mostrar inactivos</label>
+        <span class="spacer"></span>
+        <button class="btn" data-export="conductores">Exportar CSV</button>
+        <button class="btn primary" data-action="nuevo-conductor">Nuevo efectivo</button>
+      </div>
+      <div class="table-wrap"><table id="tCond"></table></div>
+    </section>
+
+    <!-- SALIDAS -->
+    <section id="view-salidas" class="view">
+      <div class="toolbar">
+        <input type="search" id="qMov" placeholder="Buscar placa, conductor, misión…">
+        <select id="fMov">
+          <option value="">Todas</option>
+          <option value="abiertas">Sin retorno</option>
+          <option value="cerradas">Con retorno</option>
+        </select>
+        <span class="spacer"></span>
+        <button class="btn" data-export="movimientos">Exportar CSV</button>
+        <button class="btn primary" data-action="nueva-salida">Registrar salida</button>
+      </div>
+      <div class="table-wrap"><table id="tMov"></table></div>
+    </section>
+
+    <!-- COMBUSTIBLE -->
+    <section id="view-combustible" class="view">
+      <div class="toolbar">
+        <input type="search" id="qComb" placeholder="Buscar placa, vale, grifo…">
+        <span class="spacer"></span>
+        <button class="btn" data-export="combustible">Exportar CSV</button>
+        <button class="btn primary" data-action="nuevo-combustible">Registrar abastecimiento</button>
+      </div>
+      <div class="table-wrap"><table id="tComb"></table></div>
+    </section>
+
+    <!-- MANTENIMIENTO -->
+    <section id="view-mantenimiento" class="view">
+      <div class="toolbar">
+        <input type="search" id="qMant" placeholder="Buscar placa, taller, trabajo…">
+        <span class="spacer"></span>
+        <button class="btn" data-export="mantenimientos">Exportar CSV</button>
+        <button class="btn primary" data-action="nuevo-mantenimiento">Registrar mantenimiento</button>
+      </div>
+      <div class="table-wrap"><table id="tMant"></table></div>
+    </section>
+
+    <!-- REPORTES -->
+    <section id="view-reportes" class="view">
+      <div class="card">
+        <div class="card-head"><h2>Uso de la flota por periodo</h2></div>
+        <div class="toolbar">
+          <label class="field-inline">Desde <input type="date" id="rDesde"></label>
+          <label class="field-inline">Hasta <input type="date" id="rHasta"></label>
+          <span class="spacer"></span>
+          <button class="btn" id="rCsv">Exportar CSV</button>
+          <button class="btn" id="rPrint">Imprimir</button>
+        </div>
+        <div class="table-wrap"><table id="tRep"></table></div>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <div class="card-head"><h2>Parámetros</h2></div>
+          <form id="cfgForm" class="form-grid">
+            <label>Mantenimiento preventivo cada (km)<input type="number" name="intervaloMantKm" min="500" step="500"></label>
+            <label>Avisar vencimientos con (días)<input type="number" name="diasAviso" min="1" max="180"></label>
+            <label>Alertar salidas abiertas de más de (horas)<input type="number" name="horasSalidaMax" min="1" max="72"></label>
+            <div class="full"><button class="btn primary">Guardar parámetros</button></div>
+          </form>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Copia de seguridad</h2></div>
+          <p class="muted">Los datos se guardan solo en este navegador. Descarga una copia con frecuencia
+            y restáurala para pasar los datos a otro equipo.</p>
+          <div class="row">
+            <button class="btn primary" id="backupBtn">Descargar copia (.json)</button>
+            <label class="btn">Restaurar copia
+              <input type="file" id="restoreInput" accept=".json,application/json" hidden>
+            </label>
+            <button class="btn danger" id="wipeBtn">Borrar todos los datos</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>Bitácora</h2><button class="btn" data-export="bitacora">Exportar CSV</button></div>
+        <div class="table-wrap short"><table id="tLog"></table></div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="dlg">
+    <form id="dlgForm" method="dialog">
+      <header><h2 id="dlgTitle"></h2><button type="button" class="btn icon" id="dlgClose" aria-label="Cerrar">✕</button></header>
+      <div id="dlgBody" class="form-grid"></div>
+      <div id="dlgError" class="error hidden" role="alert"></div>
+      <footer>
+        <span id="dlgExtra"></span>
+        <span class="spacer"></span>
+        <button type="button" class="btn" id="dlgCancel">Cancelar</button>
+        <button class="btn primary" id="dlgOk">Guardar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div id="printArea" class="print-area"></div>
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <script src="js/flota.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

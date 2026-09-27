@@ -1,5 +1,8 @@
 # Estudio Álbum
 
+> Este repositorio incluye también **[Control de Vehículos PNP](control-vehiculos/)**, una aplicación
+> independiente para el control de la flota vehicular policial.
+
 Aplicación web para **mejorar fotos automáticamente como lo haría un diseñador profesional** y
 **maquetar un álbum listo para imprimir**. Funciona íntegramente en el navegador: las fotos no se
 suben a ningún servidor.
