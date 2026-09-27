@@ -37,12 +37,29 @@
   const toBlob = (canvas, type = 'image/jpeg', q = 0.92) =>
     new Promise((res, rej) => canvas.toBlob((b) => (b ? res(b) : rej(new Error('toBlob'))), type, q));
   const tick = () => new Promise((r) => setTimeout(r, 0));
-  function download(blob, name) {
+  // Publicada en claude.ai, la página guarda archivos con la capacidad «downloads»
+  // (el visitante confirma cada archivo); abierta en local, descarga normal.
+  const savePromise = window.claude?.use ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null);
+  async function download(blob, name) {
+    const saver = await savePromise;
+    if (saver) {
+      try {
+        await saver.save({ filename: name, data: blob });
+        return true;
+      } catch (e) {
+        if (e && e.code === 'declined') { toast(`Descarga de ${name} cancelada`); return false; }
+        if (e && !['unavailable', 'not_granted', 'capability_disabled', 'capability_removed'].includes(e.code)) {
+          toast(`No se pudo guardar ${name}: ${e.message || e.code}`, 6000);
+          return false;
+        }
+      }
+    }
     const a = el('a', { href: URL.createObjectURL(blob), download: name });
     document.body.append(a);
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+    return true;
   }
   const slug = (s) => (s || 'album').normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'album';
@@ -447,8 +464,10 @@
       try {
         const c = await renderFull(p, 7000);
         busy(null, 0.8);
-        download(await toBlob(c, 'image/jpeg', 0.95), `${baseName(p.name)}-mejorada.jpg`);
+        const blob = await toBlob(c, 'image/jpeg', 0.95);
         c.width = c.height = 0;
+        done();
+        await download(blob, `${baseName(p.name)}-mejorada.jpg`);
       } finally { done(); }
     };
   }
@@ -705,7 +724,7 @@
         canvas.width = canvas.height = 0;
         if (format === 'pdf') pdfPages.push({ jpeg, pxW: W, pxH: H, wMm: w, hMm: h, bleedMm: bleed });
         else {
-          download(jpeg, `${slug(s.title)}-${String(pi).padStart(2, '0')}${pi === 0 ? '-portada' : ''}.jpg`);
+          await download(jpeg, `${slug(s.title)}-${String(pi).padStart(2, '0')}${pi === 0 ? '-portada' : ''}.jpg`);
           await new Promise((r) => setTimeout(r, 350));
         }
         // Libera memoria de las fotos que ya no aparecen en páginas siguientes.
@@ -715,7 +734,9 @@
       if (format === 'pdf') {
         busy('Generando PDF…', 1);
         await tick();
-        download(PdfWriter.build(pdfPages, { title: s.title }), `${slug(s.title)}.pdf`);
+        const pdf = PdfWriter.build(pdfPages, { title: s.title });
+        done();
+        await download(pdf, `${slug(s.title)}.pdf`);
       }
       done();
       toast(lowRes.size
