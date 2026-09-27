@@ -8,7 +8,7 @@ suben a ningún servidor.
 
 1. Abre `index.html` en Chrome, Edge, Firefox o Safari (doble clic; no requiere instalación).
    También puedes servir la carpeta: `npx serve .`
-2. **Fotos**: arrastra tus fotos (JPG, PNG o WebP). Cada una se analiza y se revela al instante.
+2. **Fotos**: arrastra tus fotos (JPG, PNG o WebP) o directamente el .zip que descarga Google Fotos. Cada una se analiza y se revela al instante.
    Activa «Ver originales» para comparar.
 3. **Edición** (opcional): compara antes/después con el deslizador, elige un estilo y afina con los
    controles. Marca el *punto de interés* para que el álbum encuadre alrededor de él.

@@ -28,10 +28,11 @@
         <div class="dz-inner">
           <div class="dz-icon">＋</div>
           <h1>Arrastra aquí tus fotos</h1>
+          <p class="dz-note">También puedes soltar el archivo .zip que descarga Google Fotos, sin descomprimirlo.</p>
           <p>Se revelan automáticamente: exposición, contraste, balance de blancos, color y nitidez.<br>
             Todo ocurre en tu navegador; tus fotos no se suben a ningún servidor.</p>
           <label class="btn primary">Elegir fotos
-            <input id="fileInput" type="file" accept="image/*" multiple hidden>
+            <input id="fileInput" type="file" accept="image/*,.zip,application/zip" multiple hidden>
           </label>
         </div>
       </div>
@@ -53,7 +54,7 @@
           <label class="switch"><input type="checkbox" id="showOriginal"> Ver originales</label>
           <span class="spacer"></span>
           <label class="btn">Añadir fotos
-            <input id="fileInput2" type="file" accept="image/*" multiple hidden>
+            <input id="fileInput2" type="file" accept="image/*,.zip,application/zip" multiple hidden>
           </label>
           <button id="toAlbum" class="btn primary">Crear álbum →</button>
         </div>
@@ -174,6 +175,7 @@
   <script src="js/enhance.js"></script>
   <script src="js/album.js"></script>
   <script src="js/pdf.js"></script>
+  <script src="js/zip.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

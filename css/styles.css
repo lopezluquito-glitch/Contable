@@ -90,6 +90,7 @@ main { flex: 1; min-height: 0; }
 .dz-icon { font-size: 44px; color: var(--accent); }
 .dropzone h1 { font-family: var(--serif); font-weight: 500; margin: 8px 0; }
 .dropzone p { color: var(--muted); margin: 0 0 22px; }
+.dropzone .dz-note { color: var(--accent); margin-bottom: 14px; }
 .library { padding: 16px 20px 40px; }
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
 .grid {

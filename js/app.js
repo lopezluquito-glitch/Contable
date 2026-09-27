@@ -115,25 +115,44 @@
 
   /* ---------- importación y revelado ---------- */
   async function importFiles(fileList) {
-    const files = [...fileList].filter((f) => f.type.startsWith('image/') || /\.(jpe?g|png|webp|avif)$/i.test(f.name));
-    if (!files.length) return;
     const failed = [];
-    for (let i = 0; i < files.length; i++) {
-      busy(`Revelando ${i + 1} de ${files.length}: ${files[i].name}`, i / files.length);
+    const items = []; // { name, get() -> File }: las fotos de un .zip se extraen una a una
+    for (const f of fileList) {
+      if (ZipReader.isZip(f)) {
+        busy(`Abriendo ${f.name}…`, 0);
+        await tick();
+        try {
+          const entries = await ZipReader.imageEntries(f);
+          if (!entries.length) failed.push(`${f.name} (no contiene fotos)`);
+          entries.forEach((e) => items.push({ name: e.base, get: () => ZipReader.extract(f, e) }));
+        } catch (e) {
+          console.error(e);
+          failed.push(`${f.name} (${e.message})`);
+        }
+      } else if (f.type.startsWith('image/') || /\.(jpe?g|png|webp|avif|heic|heif)$/i.test(f.name)) {
+        items.push({ name: f.name, get: async () => f });
+      }
+    }
+    let ok = 0;
+    for (let i = 0; i < items.length; i++) {
+      busy(`Revelando ${i + 1} de ${items.length}: ${items[i].name}`, i / items.length);
       await tick();
       try {
-        state.photos.push(await createPhoto(files[i]));
+        state.photos.push(await createPhoto(await items[i].get()));
+        ok++;
       } catch (e) {
         console.error(e);
-        failed.push(files[i].name);
+        failed.push(items[i].name);
       }
     }
     done();
     updateScores();
     sortPhotos($('#sortSelect').value);
     renderLibrary();
-    if (failed.length) toast(`No se pudieron abrir: ${failed.join(', ')} (usa JPG, PNG o WebP)`, 6000);
-    else toast(`${files.length} foto${files.length > 1 ? 's' : ''} mejorada${files.length > 1 ? 's' : ''} automáticamente ✓`);
+    if (failed.length) {
+      const heic = failed.some((n) => /\.hei[cf]$/i.test(n)) ? ' Las fotos HEIC del iPhone solo se abren en Safari.' : '';
+      toast(`${ok} foto${ok === 1 ? '' : 's'} mejorada${ok === 1 ? '' : 's'}. No se pudieron abrir: ${failed.join(', ')}.${heic}`, 8000);
+    } else if (ok) toast(`${ok} foto${ok > 1 ? 's' : ''} mejorada${ok > 1 ? 's' : ''} automáticamente ✓`);
   }
 
   async function createPhoto(file) {
